@@ -1,0 +1,27 @@
+{
+  "name": "fullstackopen",
+  "version": "1.0.0",
+  "description": "",
+  "homepage": "https://github.com/laurennasrallah/fullstackopen#readme",
+  "bugs": {
+    "url": "https://github.com/laurennasrallah/fullstackopen/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/laurennasrallah/fullstackopen.git"
+  },
+  "license": "ISC",
+  "author": "Lauren",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "morgan": "^1.10.1"
+  }
+}
