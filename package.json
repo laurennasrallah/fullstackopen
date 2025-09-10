@@ -1,5 +1,17 @@
 {
-  "dependencies": {
-    "morgan": "^1.10.1"
-  }
+  "name": "fullstackopen",
+  "version": "1.0.0",
+  "private": true,
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "cd part-3/phonebook-backend && npm start",
+    "build:ui": "cd part-3/thephonebook && npm run build",
+    "deploy:full": "npm run build:ui && cd part-3/phonebook-backend && git add dist && git commit -m 'deploy: build and deploy UI' && git push && cd ..",
+    "deploy": "git push heroku main",
+    "logs:prod": "heroku logs --tail"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
 }
