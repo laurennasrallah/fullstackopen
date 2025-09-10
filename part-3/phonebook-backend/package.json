@@ -9,7 +9,9 @@
   "scripts": {
     "start": "node phonebook.js",
     "dev": "nodemon phonebook.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build:ui": "rm -rf dist && cd ../thephonebook && npm run build && cp -r dist ../phonebook-backend",
+    "deploy:full": "npm run build:ui && cd part-3/phonebook-backend && git add dist && git add phonebook.js && git commit -m 'deploy: build and deploy UI' && git push && cd .."
   },
   "dependencies": {
     "express": "^5.1.0",
