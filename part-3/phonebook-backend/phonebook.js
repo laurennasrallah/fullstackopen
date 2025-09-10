@@ -13,22 +13,22 @@ app.use(
 
 let contacts = [
   {
-    id: '1',
+    id: 1,
     name: 'Arto Hellas',
     number: '040-123456',
   },
   {
-    id: '2',
+    id: 2,
     name: 'Ada Lovelace',
     number: '39-44-5323523',
   },
   {
-    id: '3',
+    id: 3,
     name: 'Dan Abramov',
     number: '12-43-234345',
   },
   {
-    id: '4',
+    id: 4,
     name: 'Mary Poppendieck',
     number: '39-23-6423122',
   },
@@ -84,8 +84,7 @@ app.get('/api/contacts/:id', (request, response) => {
   if (contact) {
     response.json(contact)
   } else {
-    response.json({ error: 'id does not exist' })
-    response.status(404).end()
+    response.status(404).json({ eeror: 'id does not exist' })
   }
 })
 
