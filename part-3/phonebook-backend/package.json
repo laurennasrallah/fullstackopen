@@ -10,7 +10,7 @@
     "start": "node phonebook.js",
     "dev": "nodemon phonebook.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build:ui": "rm -rf dist && (cd ../thephonebook && npm run build) && cp -r dist ///phonebook-backend",
+    "build:ui": "rm -rf dist && (cd ../thephonebook && npm run build) && cp -r ../thephonebook/dist .",
     "deploy:full": "npm run build:ui && git add dist && git add phonebook.js && git commit -m 'deploy: build and deploy UI' && git push origin main"
   },
   "dependencies": {
