@@ -10,8 +10,8 @@
     "start": "node phonebook.js",
     "dev": "nodemon phonebook.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build:ui": "npm run build --prefix ../thephonebook && cp -r ../thephonebook/dist .",
-    "deploy:full": "npm run build:ui && git add dist -f && git add . && git commit -m 'deploy: build and deploy UI' && git push origin main"
+    "build:ui": "rm -rf dist && (cd ../thephonebook && npm run build --prod && cp -r dist ../phonebook-backend)",
+    "deploy:full": "npm run build:ui && git add -f dist && git commit -m 'deploy: build and deploy UI' && git push origin main"
   },
   "dependencies": {
     "express": "^5.1.0",
