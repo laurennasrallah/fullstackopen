@@ -98,10 +98,11 @@ app.delete('/api/contacts/:id', (request, response) => {
 })
 
 app.get('*', (req, res) => {
-  res.sendFile(distPath + '/index.html')
+  console.log('Serving index.html for route:', req.path)
+  res.sendFile(path.join(__dirname, 'dist', 'index.html'))
 })
 
-const PORT = process.env.PORT || 3001
+const PORT = 3001
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })
