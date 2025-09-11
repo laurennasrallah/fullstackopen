@@ -38,7 +38,7 @@ app.use(
   morgan(':method :url :status :res[content-length] - :response-time ms :body')
 )
 
-pp.get('/', (request, response) => {
+app.get('/', (request, response) => {
   response.send('<h1>Hello from the phonebook backend!</h1>')
 })
 
