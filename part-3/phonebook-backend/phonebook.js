@@ -92,10 +92,6 @@ app.post('/api/contacts', (request, response) => {
   response.json(contact)
 })
 
-app.get('*', (request, response) => {
-  response.sendFile(path.join(__dirname, 'dist', 'index.html'))
-})
-
 const PORT = 3001
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
