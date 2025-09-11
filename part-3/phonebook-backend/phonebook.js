@@ -3,15 +3,11 @@ const app = express()
 const morgan = require('morgan')
 const cors = require('cors')
 
+const path = require('path')
+
 app.use(express.json())
 app.use(cors())
 app.use(express.static('dist'))
-
-morgan.token('body', (req, res) => JSON.stringify(req.body))
-
-app.use(
-  morgan(':method :url :status :res[content-length] - :response-time ms :body')
-)
 
 let contacts = [
   {
@@ -36,47 +32,18 @@ let contacts = [
   },
 ]
 
+morgan.token('body', (req, res) => JSON.stringify(req.body))
+
+app.use(
+  morgan(':method :url :status :res[content-length] - :response-time ms :body')
+)
+
+pp.get('/', (request, response) => {
+  response.send('<h1>Hello from the phonebook backend!</h1>')
+})
+
 app.get('/api/contacts', (request, response) => {
   response.json(contacts)
-})
-
-app.get('/info', (request, response) => {
-  response.send(`<h2>Phonebook has info for ${contacts.length} people</h2>
-    <p>${new Date()}</p>
-    `)
-})
-
-app.post('/api/contacts', (request, response) => {
-  const contact = request.body
-
-  if (!contact.name || !contact.number) {
-    return response.status(400).json({
-      error: 'name or number missing',
-    })
-  }
-
-  const nameExists = contacts.some((c) => c.name === contact.name)
-  console.log(nameExists)
-  if (nameExists) {
-    return response.status(409).json({
-      error: 'name must be unique',
-    })
-  }
-
-  const generateId = () => {
-    const maxId =
-      contacts.length > 0 ? Math.max(...contacts.map((c) => c.id)) : 0
-    return maxId + 1
-  }
-
-  const newContact = {
-    id: generateId(),
-    name: contact.name,
-    number: contact.number,
-  }
-
-  contacts = contacts.concat(newContact)
-  response.status(201).json(newContact)
 })
 
 app.get('/api/contacts/:id', (request, response) => {
@@ -86,7 +53,7 @@ app.get('/api/contacts/:id', (request, response) => {
   if (contact) {
     response.json(contact)
   } else {
-    response.status(404).json({ eeror: 'id does not exist' })
+    response.status(404).end()
   }
 })
 
@@ -97,9 +64,36 @@ app.delete('/api/contacts/:id', (request, response) => {
   response.status(204).end()
 })
 
-app.get('*', (req, res) => {
-  console.log('Serving index.html for route:', req.path)
-  res.sendFile(path.join(__dirname, 'dist', 'index.html'))
+app.post('/api/contacts', (request, response) => {
+  const body = request.body
+  if (!body.name || !body.number) {
+    return response.status(400).json({
+      error: 'name or number missing',
+    })
+  }
+
+  if (contacts.find((c) => c.name === body.name)) {
+    return response.status(400).json({
+      error: 'name must be unique',
+    })
+  }
+
+  const generateId = () => {
+    return Math.floor(Math.random() * 1000000)
+  }
+
+  const contact = {
+    name: body.name,
+    number: body.number,
+    id: generateId(),
+  }
+
+  contacts = contacts.concat(contact)
+  response.json(contact)
+})
+
+app.get('*', (request, response) => {
+  response.sendFile(path.resolve('dist', 'index.html'))
 })
 
 const PORT = 3001
