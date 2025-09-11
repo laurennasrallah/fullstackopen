@@ -93,7 +93,7 @@ app.post('/api/contacts', (request, response) => {
 })
 
 app.get('*', (request, response) => {
-  response.sendFile(path.resolve('dist', 'index.html'))
+  response.sendFile(path.join(__dirname, 'dist', 'index.html'))
 })
 
 const PORT = 3001
