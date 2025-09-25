@@ -4,29 +4,6 @@ const Contact = require('./models/contact')
 const app = express()
 const morgan = require('morgan')
 
-let contacts = [
-  {
-    id: 1,
-    name: 'Arto Hellas',
-    number: '040-123456',
-  },
-  {
-    id: 2,
-    name: 'Ada Lovelace',
-    number: '39-44-5323523',
-  },
-  {
-    id: 3,
-    name: 'Dan Abramov',
-    number: '12-43-234345',
-  },
-  {
-    id: 4,
-    name: 'Mary Poppendieck',
-    number: '39-23-6423122',
-  },
-]
-
 morgan.token('body', (req, res) => JSON.stringify(req.body))
 
 app.use(
@@ -38,6 +15,8 @@ const errorHandler = (error, request, response, next) => {
 
   if (error.name === 'CastError') {
     return response.status(400).send({ error: 'malformatted id' })
+  } else if (error.name === 'ValidationError') {
+    return response.status(400).send({ error: error.message })
   }
 
   next(error)
@@ -76,7 +55,7 @@ app.delete('/api/contacts/:id', (request, response, next) => {
     .catch((error) => next(error))
 })
 
-app.post('/api/contacts', (request, response) => {
+app.post('/api/contacts', (request, response, next) => {
   const body = request.body
   if (!body.name || !body.number) {
     return response.status(400).json({ error: 'name or number missing' })
@@ -87,26 +66,27 @@ app.post('/api/contacts', (request, response) => {
     number: body.number,
   })
 
-  contact.save().then((savedContact) => {
-    response.json(savedContact)
-  })
+  contact
+    .save()
+    .then((savedContact) => {
+      response.json(savedContact)
+    })
+    .catch((error) => next(error))
 })
 
 app.put('/api/contacts/:id', (request, response, next) => {
   const { name, number } = request.body
 
-  Contact.findById(request.params.id)
-    .then((contact) => {
-      if (!contact) {
+  Contact.findByIdAndUpdate(id, updateContact, {
+    new: true,
+    runValidators: true,
+    context: 'query',
+  })
+    .then((updatedContact) => {
+      if (!updatedContact) {
         return response.status(404).end()
       }
-
-      contact.name = name
-      contact.number = number
-
-      return contact.save().then((updatedContact) => {
-        response.json(updatedContact)
-      })
+      response.json(updatedContact)
     })
     .catch((error) => next(error))
 })

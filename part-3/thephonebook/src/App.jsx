@@ -46,7 +46,7 @@ const App = () => {
               // creates a new person array
               if (person.name === existingPerson.name) {
                 // check if this is the person we want to update
-                return updatedPerson // if it is, return the newly updated person
+                return response.data // if it is, return the newly updated person
               } else {
                 return person // if not, return the original person object unchanged
               }
@@ -55,13 +55,20 @@ const App = () => {
             setPersons(newPersonsArray) // Update the state with the new array
             console.log('Updated person:', updatedPerson)
             console.log('New persons array after update:', newPersonsArray)
+            setMessage(`${updatedPerson.name} number has been changed`)
+            setIsSuccess(true)
+            setTimeout(() => {
+              setMessage(null)
+              setIsSuccess(false)
+            }, 5000)
           })
-        setMessage(`${updatedPerson.name} number has been changed`)
-        setIsSuccess(true)
-        setTimeout(() => {
-          setMessage(null)
-          setIsSuccess(false)
-        }, 5000)
+          .catch((error) => {
+            setMessage(error.response.data.error)
+            setIsSuccess(false)
+            setTimeout(() => {
+              setMessage(null)
+            }, 5000)
+          })
       }
       // if user cancels, nothing happens within this block
     } else {
@@ -69,21 +76,27 @@ const App = () => {
       const personObject = { name: newName, number: newNumber }
       console.log('Adding person:', personObject)
 
-      setPersons(persons.concat(personObject))
-      console.log('Update persons:', persons.concat(personObject))
-
       // this then updates the server with the new person
-      contactService.create(personObject).then((response) => {
-        setPersons(persons.concat(response.data))
-        setNewName('')
-        setNewNumber('')
-        setMessage(`${personObject.name} has been added`)
-        setIsSuccess(true)
-        setTimeout(() => {
-          setMessage(null)
+      contactService
+        .create(personObject)
+        .then((returnedContact) => {
+          setPersons(persons.concat(returnedContact.data))
+          setNewName('')
+          setNewNumber('')
+          setMessage(`Added ${returnedContact.data.name}`)
+          setIsSuccess(true)
+          setTimeout(() => {
+            setMessage(null)
+            setIsSuccess(false)
+          }, 5000)
+        })
+        .catch((error) => {
+          setMessage(error.response.data.error)
           setIsSuccess(false)
-        }, 10000)
-      })
+          setTimeout(() => {
+            setMessage(null)
+          }, 5000)
+        })
     }
 
     // clear input fields
@@ -114,15 +127,21 @@ const App = () => {
           console.log(response)
           setPersons(persons.filter((person) => person.id !== id)) // filtering out the removed person
           console.log(persons)
+          setMessage(`Removed ${personToRemove.name}`)
+          setIsSuccess(true)
+          setTimeout(() => {
+            setMessage(null)
+            setIsSuccess(false)
+          }, 5000)
         })
         .catch((error) => {
           setMessage(
             `Information of ${personToRemove.name} has already been removed from the server`
           )
-          setIsSuccess(flase)
+          setIsSuccess(false)
           setTimeout(() => {
             setMessage(null)
-          }, 500)
+          }, 5000)
         })
     }
   }

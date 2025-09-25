@@ -16,8 +16,21 @@ mongoose
   })
 
 const contactSchema = new mongoose.Schema({
-  name: String,
-  number: String,
+  name: {
+    type: String,
+    minLength: [3, 'Name is too short, must be at least 3 characters.'],
+  },
+  number: {
+    type: String,
+    minLength: [8, 'Phone number must be at least 8 digits.'],
+    validate: {
+      validator: function (v) {
+        console.log('Validating number:', v)
+        return /^\d{2,3}-\d{8,}$/.test(v)
+      },
+      message: (props) => `${props.value} is not a valid phone number!`,
+    },
+  },
 })
 
 contactSchema.set('toJSON', {
