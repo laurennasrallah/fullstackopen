@@ -75,7 +75,9 @@ app.post('/api/contacts', (request, response, next) => {
 })
 
 app.put('/api/contacts/:id', (request, response, next) => {
+  const id = request.params.id
   const { name, number } = request.body
+  const updateContact = { name, number }
 
   Contact.findByIdAndUpdate(id, updateContact, {
     new: true,

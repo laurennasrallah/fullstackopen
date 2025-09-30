@@ -1,4 +1,5 @@
 const mongoose = require('mongoose')
+import Contact from './models/contact.js'
 
 if (process.argv.length < 3) {
   console.log('give password as argument')
@@ -14,13 +15,6 @@ const url = `mongodb+srv://lauren:${password}@cluster0.4ngmyh3.mongodb.net/phone
 mongoose.set('strictQuery', false)
 
 mongoose.connect(url)
-
-const contactSchema = new mongoose.Schema({
-  name: String,
-  number: String,
-})
-
-const Contact = mongoose.model('Contact', contactSchema)
 
 const contact = new Contact({
   name: newPerson,
