@@ -4,7 +4,7 @@ const Contact = require('./models/contact')
 const app = express()
 const morgan = require('morgan')
 
-morgan.token('body', (req, res) => JSON.stringify(req.body))
+morgan.token('body', (req) => JSON.stringify(req.body))
 
 app.use(
   morgan(':method :url :status :res[content-length] - :response-time ms :body')
@@ -49,7 +49,7 @@ app.get('/api/contacts/:id', (request, response, next) => {
 
 app.delete('/api/contacts/:id', (request, response, next) => {
   Contact.findByIdAndDelete(request.params.id)
-    .then((result) => {
+    .then(() => {
       response.status(204).end()
     })
     .catch((error) => next(error))

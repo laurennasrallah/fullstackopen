@@ -108,16 +108,6 @@ const App = () => {
     setFilter(event.target.value)
   }
 
-  let personToShow = []
-
-  if (filter === '') {
-    personToShow = persons
-  } else {
-    personToShow = persons.filter((person) => {
-      return person.name.toLowerCase().includes(filter.toLowerCase())
-    })
-  }
-
   const removeContactById = (id) => {
     const personToRemove = persons.find((person) => person.id === id)
     if (window.confirm(`Delete ${personToRemove.name}?`)) {
@@ -134,7 +124,7 @@ const App = () => {
             setIsSuccess(false)
           }, 5000)
         })
-        .catch((error) => {
+        .catch(() => {
           setMessage(
             `Information of ${personToRemove.name} has already been removed from the server`
           )
@@ -145,6 +135,12 @@ const App = () => {
         })
     }
   }
+
+  const personsToShow = filter
+    ? persons.filter((person) =>
+        person.name.toLowerCase().includes(filter.toLowerCase())
+      )
+    : persons
 
   return (
     <div>
@@ -159,7 +155,7 @@ const App = () => {
         setNewNumber={setNewNumber}
       />
       <ul>
-        {persons.map((person) => (
+        {personsToShow.map((person) => (
           <Person
             key={person.id}
             person={person}

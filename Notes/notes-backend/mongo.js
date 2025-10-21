@@ -35,7 +35,7 @@ note.save().then((result) => {
 Note.find({}).then((result) => {
   console.log('these are my notes:')
   result.forEach((note) => {
-    console.log(`${note.content}, ${note.important}`)
+    console.log(`${note.content}, ${note.impor}`)
   })
   mongoose.connection.close()
 })
