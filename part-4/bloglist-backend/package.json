@@ -12,6 +12,7 @@
   "type": "commonjs",
   "dependencies": {
     "express": "^5.1.0",
+    "lodash": "^4.17.21",
     "mongoose": "^8.19.2"
   }
 }
