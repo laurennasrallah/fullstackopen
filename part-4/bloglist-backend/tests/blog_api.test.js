@@ -1,0 +1,97 @@
+const { test, after, beforeEach } = require('node:test')
+const assert = require('node:assert')
+const mongoose = require('mongoose')
+const supertest = require('supertest')
+const app = require('../app')
+const Blog = require('../models/blog')
+const helper = require('./test_helper')
+
+const api = supertest(app)
+
+beforeEach(async () => {
+  await Blog.deleteMany({})
+
+  const blogObject = new Blog({
+    title: 'First blog',
+    author: 'Tester',
+    url: 'http://test.com',
+    likes: 5,
+  })
+  await blogObject.save()
+})
+
+test('blogs are returned as json', async () => {
+  await api
+    .get('/api/blogs')
+    .expect(200)
+    .expect('Content-Type', /application\/json/)
+  //   await api.get('/test').expect(200)
+})
+
+test('blogs have a unique identifier property', async () => {
+  const response = await api.get('/api/blogs')
+  const firstBlog = response.body[0]
+  assert(firstBlog.id !== undefined)
+  assert(firstBlog._id === undefined)
+  //console.log(firstBlog)
+})
+
+test('a valid blog can be added ', async () => {
+  const blogsAtStart = await helper.blogsInDb()
+
+  const newBlog = {
+    title: 'Test blog',
+    author: 'Tester',
+    url: 'http://test.com',
+    likes: 8,
+  }
+
+  await api
+    .post('/api/blogs')
+    .send(newBlog)
+    .expect(201)
+    .expect('Content-Type', /application\/json/)
+
+  const blogsAtEnd = await helper.blogsInDb()
+  assert.strictEqual(blogsAtEnd.length, blogsAtStart.length + 1)
+
+  const contents = blogsAtEnd.map((blog) => blog.title)
+  assert(contents.includes(newBlog.title))
+})
+
+test('a blog with missing likes still gets added', async () => {
+  const blogsAtStart = await helper.blogsInDb()
+
+  const newBlog = {
+    title: 'Another test blog',
+    author: 'Tester',
+    url: 'http://test.com',
+  }
+
+  await api.post('/api/blogs').send(newBlog)
+
+  const blogsAtEnd = await helper.blogsInDb()
+  assert.strictEqual(blogsAtEnd.length, blogsAtStart.length + 1)
+
+  const addedBlog = blogsAtEnd[blogsAtEnd.length - 1]
+
+  assert.strictEqual(addedBlog.likes, 0)
+})
+
+test('a blog with a missing title and url does not get added', async () => {
+  const blogsAtStart = await helper.blogsInDb()
+
+  const newBlog = {
+    author: 'Tester',
+    likes: 5,
+  }
+
+  await api.post('/api/blogs').send(newBlog).expect(400)
+
+  const blogsAtEnd = await helper.blogsInDb()
+  assert.strictEqual(blogsAtEnd.length, blogsAtStart.length)
+})
+
+after(async () => {
+  await mongoose.connection.close()
+})
