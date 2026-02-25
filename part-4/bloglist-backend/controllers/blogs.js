@@ -19,6 +19,47 @@ blogRouter.post('/', async (request, response) => {
   }
 })
 
+blogRouter.delete('/:id', async (request, response) => {
+  await Blog.findByIdAndDelete(request.params.id)
+  response.status(204).end()
+})
+
+blogRouter.put('/:id', async (request, response) => {
+  /*
+findByIdAndUpdate Parameters:
+
+1. id:
+   The unique _id of the document we want to update.
+
+2. update:
+   An object containing the fields to update and their new values.
+
+3. options:
+   new: if true, returns the updated document (default: false)
+   upsert: if true, creates the document if it doesn’t exist
+   runValidators: if true, runs schema validation during update
+
+4. callback:
+   Optional. Instead of callback, we can use async/await or .then().
+
+Return Value:
+
+Returns the updated document if new: true is specified, 
+or the original document if new: false (default).
+If no document is found with the specified id, it returns null.
+  
+*/
+
+  const updatedData = request.body
+
+  const updatedBlog = await Blog.findByIdAndUpdate(
+    request.params.id,
+    updatedData,
+    { new: true },
+  )
+  response.json(updatedBlog)
+})
+
 module.exports = blogRouter
 
 // no need for a try/catch block as Express 5 automatically passes rejcted promises

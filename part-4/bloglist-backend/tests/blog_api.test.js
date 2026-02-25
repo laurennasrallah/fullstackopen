@@ -92,6 +92,52 @@ test('a blog with a missing title and url does not get added', async () => {
   assert.strictEqual(blogsAtEnd.length, blogsAtStart.length)
 })
 
+test('a blog can be deleted', async () => {
+  const blogsAtStart = await helper.blogsInDb()
+  const blogToDelete = blogsAtStart[0]
+
+  await api.delete(`/api/blogs/${blogToDelete.id}`).expect(204)
+
+  const blogsAtEnd = await helper.blogsInDb()
+
+  const ids = blogsAtEnd.map((b) => b.id)
+  assert(!ids.includes(blogToDelete.id))
+
+  assert.strictEqual(blogsAtEnd.length, blogsAtStart.length - 1)
+})
+
+test('a blog can be updated', async () => {
+  const blogsAtStart = await helper.blogsInDb()
+  const blogToUpdate = blogsAtStart[0]
+
+  //creat and object to prepare the updated data
+  const updatedBlog = {
+    ...blogToUpdate,
+    likes: blogToUpdate.likes + 1,
+  }
+
+  // capturing the response so I can verify the API response
+  // databases can update but the api responses can stay the same
+  // so it's important to check both have updated !
+  const response = await api
+    .put(`/api/blogs/${updatedBlog.id}`)
+    .send(updatedBlog)
+    .expect(200)
+    .expect('Content-Type', /application\/json/)
+
+  // verify the API response reflects the update
+
+  assert.strictEqual(response.body.likes, blogToUpdate.likes + 1)
+  assert.strictEqual(response.body.id, blogToUpdate.id)
+
+  // verify the data base reflects the update
+  const blogsAtEnd = await helper.blogsInDb()
+  const updatedBlogFromDb = blogsAtEnd.find((b) => b.id === blogToUpdate.id)
+
+  assert.strictEqual(updatedBlogFromDb.likes, blogToUpdate.likes + 1)
+  assert.strictEqual(blogsAtEnd.length, blogsAtStart.length)
+})
+
 after(async () => {
   await mongoose.connection.close()
 })
