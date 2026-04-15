@@ -3,21 +3,40 @@ const assert = require('node:assert')
 const mongoose = require('mongoose')
 const supertest = require('supertest')
 const app = require('../app')
+const bcrypt = require('bcrypt')
 const Blog = require('../models/blog')
 const helper = require('./test_helper')
+const User = require('../models/user')
 
 const api = supertest(app)
 
+let testUser
+let token
+
 beforeEach(async () => {
   await Blog.deleteMany({})
+  await User.deleteMany({})
 
-  const blogObject = new Blog({
+  const passwordHash = await bcrypt.hash('sekret', 10)
+  testUser = new User({ username: 'root', passwordHash })
+  await testUser.save()
+
+  const loginResponse = await api.post('/api/login').send({
+    username: 'root',
+    password: 'sekret',
+  })
+
+  token = loginResponse.body.token
+
+  const blogWithUser = new Blog({
     title: 'First blog',
     author: 'Tester',
     url: 'http://test.com',
     likes: 5,
+    user: testUser._id,
   })
-  await blogObject.save()
+
+  await blogWithUser.save()
 })
 
 test('blogs are returned as json', async () => {
@@ -48,6 +67,7 @@ test('a valid blog can be added ', async () => {
 
   await api
     .post('/api/blogs')
+    .set('Authorization', `Bearer ${token}`)
     .send(newBlog)
     .expect(201)
     .expect('Content-Type', /application\/json/)
@@ -68,7 +88,10 @@ test('a blog with missing likes still gets added', async () => {
     url: 'http://test.com',
   }
 
-  await api.post('/api/blogs').send(newBlog)
+  await api
+    .post('/api/blogs')
+    .set('Authorization', `Bearer ${token}`)
+    .send(newBlog)
 
   const blogsAtEnd = await helper.blogsInDb()
   assert.strictEqual(blogsAtEnd.length, blogsAtStart.length + 1)
@@ -86,7 +109,11 @@ test('a blog with a missing title and url does not get added', async () => {
     likes: 5,
   }
 
-  await api.post('/api/blogs').send(newBlog).expect(400)
+  await api
+    .post('/api/blogs')
+    .set('Authorization', `Bearer ${token}`)
+    .send(newBlog)
+    .expect(400)
 
   const blogsAtEnd = await helper.blogsInDb()
   assert.strictEqual(blogsAtEnd.length, blogsAtStart.length)
@@ -96,7 +123,10 @@ test('a blog can be deleted', async () => {
   const blogsAtStart = await helper.blogsInDb()
   const blogToDelete = blogsAtStart[0]
 
-  await api.delete(`/api/blogs/${blogToDelete.id}`).expect(204)
+  await api
+    .delete(`/api/blogs/${blogToDelete.id}`)
+    .set('Authorization', `Bearer ${token}`)
+    .expect(204)
 
   const blogsAtEnd = await helper.blogsInDb()
 
